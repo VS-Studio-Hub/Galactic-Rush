@@ -1,143 +1,149 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Vector3 originalScale;
-    private Vector3 originalPosition;
+    private float laneDistance = 1.5f;
+    private int currentLane = 1;
 
+    private float moveSpeed = 10.0f;
+    private Vector3 targetPosition;
+
+    public bool canMove = true;
+    public bool isJumping = false;
+    public bool comingDown = false;
+    public bool isSliding = false;
+    public bool comingUp = false;
+
+    public bool isJump = true;
+
+    private Animator animator;
+    private Rigidbody rb;
     private CapsuleCollider capsuleCollider;
-    private Rigidbody playerRb;
 
+    private Vector3 originalCenter;
     private float originalHeight;
-    private Vector3 crouchScale = new Vector3(1, 0.5f, 1);
-    private Vector3 playerScale = new Vector3(1, 1f, 1);
-    private float jumpForce = 5f;
 
-    private float laneDistance = 2.0f; // Distance between lanes
-    private int currentLane = 1; // 0 = left, 1 = middle, 2 = right
-
-    private bool isGrounded = true;
-    private Rigidbody Lane;
-    private EnergyBar energyBar;
-    private GameObject Invincible;
-    private 
     void Start()
     {
-        originalScale = transform.localScale;
-        originalPosition = transform.localPosition;
-
+        targetPosition = transform.position;
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
-        playerRb = GetComponent<Rigidbody>();
 
+        originalCenter = capsuleCollider.center;
         originalHeight = capsuleCollider.height;
     }
 
+    // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            Crouch();
-        }
-        if (Input.GetKeyUp(KeyCode.LeftControl))
-        {
-            StandUp();
-        }
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            Jump();
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
+        if (GameManager.gameOver)
+            return;
+        float speed = 10;
+        animator.SetFloat("Speed", speed);
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
         {
             MoveLeft();
         }
 
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
             MoveRight();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isJump)
+        {
+            if (isJumping == false)
+            {
+                isJumping = true;
+                animator.SetBool("IsJumping", true);
+                StartCoroutine(JumpSequence());
+            }
+        }
+
+
+        if (isJumping == true)
+        {
+            if (comingDown == false)
+            {
+                transform.Translate(Vector3.up * Time.deltaTime * 10, Space.World);
+            }
+            if (comingDown == true)
+            {
+                transform.Translate(Vector3.down * Time.deltaTime * 5, Space.World);
+            }
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            if(isSliding == false)
+            {
+                isSliding = true;
+                SlideStart();
+                animator.SetBool("IsSliding", true);
+                StartCoroutine(SlideSequence());
+            }
+        }
+
+        transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * moveSpeed);
+    }
+
+    
+
+    private void MoveLeft()
+    {
+        if (currentLane > 0)
+        {
+            currentLane--;
+            targetPosition.x = (currentLane - 1) * laneDistance;
         }
     }
 
     private void MoveRight()
     {
-        if (currentLane < 2) 
+        if (currentLane < 2)
         {
             currentLane++;
-            MoveToLane();
+            targetPosition.x = (currentLane - 1) * laneDistance;
         }
     }
 
-    private void MoveLeft()
+    IEnumerator JumpSequence()
     {
-        if (currentLane > 0) 
-        {
-            currentLane--;
-            MoveToLane();
-        }
+        yield return new WaitForSeconds(0.55f);
+        comingDown = true;
+        yield return new WaitForSeconds(0.30f);
+        isJumping = false;
+        comingDown = false;
+        animator.SetBool("IsJumping", false);
     }
 
-    private void MoveToLane()
+    IEnumerator SlideSequence()
     {
-        Vector3 targetPosition = new Vector3((currentLane - 1) * laneDistance, transform.position.y, transform.position.z);
-        transform.position = targetPosition;
+        yield return new WaitForSeconds(0.55f);
+        comingUp = true;
+        yield return new WaitForSeconds(0.30f);
+        isSliding = false;
+        comingUp = false;
+        animator.SetBool("IsSliding", false);
+        SlideEnd();
+    }
+    public void SlideStart()
+    {
+        capsuleCollider.height = originalHeight / 2f;
+        capsuleCollider.center = new Vector3(originalCenter.x, originalCenter.y / 2f, originalCenter.z);
+        isJump = false;
     }
 
-    private void Jump()
+    public void SlideEnd()
     {
-        playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        isGrounded = false;
+        capsuleCollider.height = originalHeight;
+        capsuleCollider.center = originalCenter;
+        isJump = true;
     }
-
-    void Crouch()
-    {
-        transform.localScale = crouchScale;
-        transform.position = new Vector3(transform.position.x,transform.position.y - 0.5f, transform.position.z);
-    }
-
-    void StandUp()
-    {
-        transform.localScale = playerScale;
-        transform.position = new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z);
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = false;
-        }
-    }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.name == "Cube" || collision.gameObject.name == "Cube (1)")
-        {
-            Lane= collision.gameObject.GetComponent<Rigidbody>();
-            Physics.IgnoreCollision(GetComponent<Collider>(), Lane.gameObject.GetComponent<Collider>(), true);
-        }
-        if (collision.gameObject.CompareTag("Collectible"))
-        {
-            energyBar = GameObject.Find("EnergyBar").GetComponent<EnergyBar>();
-            energyBar.current += 10;
-            Destroy(collision.gameObject);
-            if (energyBar.current == energyBar.maximum)
-            {
-
-            }
-        }
-        if (collision.gameObject.name == "Cube (2)")
-        {
-            Physics.IgnoreCollision(GetComponent<Collider>(), Lane.gameObject.GetComponent<Collider>(), true);
-        }
-    }
-    
 }
