@@ -12,6 +12,7 @@ public class ShopManager : MonoBehaviour
 
     public PlayerBlueprint[] playerBlueprints;
     public Button buyButton;
+    public Button startButton;
 
     public TextMeshProUGUI coinText;
     void Start()
@@ -83,11 +84,12 @@ public class ShopManager : MonoBehaviour
         p.isPurchased = true;
         SaveManager.instance.SaveTotalGem(SaveManager.instance.LoadTotalGem() - p.price);
         //SaveManager.instance.SaveGemCount(PlayerPrefs.GetInt("GemCount", 0) - p.price);
+        buyButton.gameObject.SetActive(false);
+        startButton.gameObject.SetActive(true);
     }
 
     private void UpdateUI()
     {
-        
         PlayerBlueprint p = playerBlueprints[currentPlayerIndex];
         if (p.isPurchased)
         {
@@ -97,7 +99,7 @@ public class ShopManager : MonoBehaviour
         {
             buyButton.gameObject.SetActive(true);
             buyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Buy- " + p.price;
-            if (p.price < SaveManager.instance.LoadTotalGem())
+            if (p.price > SaveManager.instance.LoadTotalGem())
             {
                 buyButton.interactable = false;
             }
