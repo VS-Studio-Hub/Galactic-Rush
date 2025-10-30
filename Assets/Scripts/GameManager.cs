@@ -67,6 +67,7 @@ public class GameManager : MonoBehaviour
                 UpdateUI();
                 scoreSaved = true;
             }
+            return;
         }
         //distanceText.text = playerName + Mathf.FloorToInt(distanceTraveled) + "m";
         LaneSpeed();

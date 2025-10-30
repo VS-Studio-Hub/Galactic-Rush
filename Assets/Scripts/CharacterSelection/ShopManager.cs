@@ -1,118 +1,116 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 public class ShopManager : MonoBehaviour
 {
-    public int currentPlayerIndex;
-    public GameObject[] playerPrefabs;
+    public static ShopManager instance;
 
+    public int currentPlayerIndex = 0;
+    public GameObject[] players;
     public PlayerBlueprint[] playerBlueprints;
-    public Button buyButton;
-    public Button startButton;
 
-    public TextMeshProUGUI coinText;
+    public TextMeshProUGUI gem;
+
+    public Button play, Buy;
+
+    private void Awake()
+    {
+        instance = this;
+    }
     void Start()
     {
-        coinText.text = "Coins: " + SaveManager.instance.LoadTotalGem();
-        foreach (PlayerBlueprint player in playerBlueprints)
+
+        foreach (PlayerBlueprint blueprint in playerBlueprints)
         {
-            if(player.price == 0)
-                player.isPurchased = true;
-            else
-                player.isPurchased = PlayerPrefs.GetInt(player.name, 0) == 0 ? false:true;
+            if (SaveManager.instance.LoadPurchasedPlayer(blueprint.index))
+            {
+                blueprint.isPurchased = true;
+            }
         }
-        currentPlayerIndex = PlayerPrefs.GetInt("SelectedPlayer", 0);
-        foreach (GameObject player in playerPrefabs)
+        foreach (GameObject player in players)
         {
             player.SetActive(false);
         }
+        players[currentPlayerIndex].SetActive(true);
 
-        playerPrefabs[currentPlayerIndex].SetActive(true);
+        UIUpdate();
 
     }
+
+    // Update is called once per frame
     void Update()
     {
-        UpdateUI();
+        UIUpdate();
+    }
+
+    void UIUpdate()
+    {
+        gem.text = SaveManager.instance.LoadTotalGem().ToString();
+
+
+
+        if(playerBlueprints[currentPlayerIndex].isPurchased)
+        {
+            Buy.gameObject.SetActive(false);
+            play.gameObject.SetActive(true);
+        }
+        else
+        {
+            Buy.gameObject.SetActive(true);
+            play.gameObject.SetActive(false);
+        }
+
+        int currentGems = SaveManager.instance.LoadTotalGem();
+        
+        if (currentGems < playerBlueprints[currentPlayerIndex].price && !playerBlueprints[currentPlayerIndex].isPurchased)
+        {
+            Buy.interactable = false;
+        }
+    }
+
+    public void BuyPlayer()
+    {
+        int currentGems = SaveManager.instance.LoadTotalGem();
+        if(currentGems >= playerBlueprints[currentPlayerIndex].price && !playerBlueprints[currentPlayerIndex].isPurchased)
+        {
+            currentGems -= playerBlueprints[currentPlayerIndex].price;
+            SaveManager.instance.SetTotalGem(currentGems);
+            playerBlueprints[currentPlayerIndex].isPurchased = true;
+        }
+        SaveManager.instance.SavePurchasedPlayer(playerBlueprints[currentPlayerIndex].index);
     }
 
     public void NextPlayer()
     {
-        playerPrefabs[currentPlayerIndex].SetActive(false);
-
+        players[currentPlayerIndex].SetActive(false);
         currentPlayerIndex++;
-        if (currentPlayerIndex == playerPrefabs.Length)
+        if (currentPlayerIndex == players.Length)
         {
             currentPlayerIndex = 0;
         }
-        playerPrefabs[currentPlayerIndex].SetActive(true);
-        PlayerBlueprint p = playerBlueprints[currentPlayerIndex];
-        if (!p.isPurchased)
-        {
-            return;
-        }
-        PlayerPrefs.SetInt("SelectedPlayer", currentPlayerIndex);
+        players[currentPlayerIndex].SetActive(true);
+        SaveManager.instance.SavePurchasedPlayer(playerBlueprints[currentPlayerIndex].index);
     }
 
     public void PreviousPlayer()
-    { 
-        playerPrefabs[currentPlayerIndex].SetActive(false);
-
+    {
+        players[currentPlayerIndex].SetActive(false);
         currentPlayerIndex--;
-        if (currentPlayerIndex == -1)
+        if (currentPlayerIndex < 0)
         {
-            currentPlayerIndex = playerPrefabs.Length - 1;
+            currentPlayerIndex = players.Length - 1;
         }
-        playerPrefabs[currentPlayerIndex].SetActive(true);
-        PlayerBlueprint p = playerBlueprints[currentPlayerIndex];
-        if (!p.isPurchased)
-        {
-            return;
-        }
-        PlayerPrefs.SetInt("SelectedPlayer", currentPlayerIndex);
+        players[currentPlayerIndex].SetActive(true);
+        SaveManager.instance.SavePurchasedPlayer(playerBlueprints[currentPlayerIndex].index);
     }
 
-    public void UnlockPlayer()
+    public void Play()
     {
-        PlayerBlueprint p = playerBlueprints[currentPlayerIndex];
-
-        PlayerPrefs.SetInt(p.name, 1);
-        PlayerPrefs.SetInt("SelectedPlayer", currentPlayerIndex);
-        p.isPurchased = true;
-        SaveManager.instance.SaveTotalGem(SaveManager.instance.LoadTotalGem() - p.price);
-        //SaveManager.instance.SaveGemCount(PlayerPrefs.GetInt("GemCount", 0) - p.price);
-        buyButton.gameObject.SetActive(false);
-        startButton.gameObject.SetActive(true);
-    }
-
-    private void UpdateUI()
-    {
-        PlayerBlueprint p = playerBlueprints[currentPlayerIndex];
-        if (p.isPurchased)
-        {
-            buyButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            buyButton.gameObject.SetActive(true);
-            buyButton.GetComponentInChildren<TextMeshProUGUI>().text = "Buy- " + p.price;
-            if (p.price > SaveManager.instance.LoadTotalGem())
-            {
-                buyButton.interactable = false;
-            }
-            else
-            {
-                buyButton.interactable = true;
-            }
-        }
-    }
-
-    public void GamePlay()
-    {
-        GameManager.gemCount = 0;
         SceneManager.LoadScene("GamePlay");
+        GameManager.gemCount = 0;
     }
 }

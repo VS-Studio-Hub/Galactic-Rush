@@ -9,72 +9,85 @@ public class SaveManager : MonoBehaviour
     {
         instance = this;
     }
-    void Start()
+    private string GetPlayerKey(string key)
     {
-        //playerName = EnterNameManager.instance.GetOnSubmitName();
+        string playerName = PlayerPrefs.GetString("CurrentPlayerName", "DefaultPlayer");
+        return playerName + " " + key;
     }
     public void SavePlayerName(string playerName)
     {
-        PlayerPrefs.SetString("PlayerName", playerName);
+        PlayerPrefs.SetString(GetPlayerKey("PlayerName"), playerName);
         PlayerPrefs.Save();
     }
 
     public string LoadPlayerName()
     {
-        return PlayerPrefs.GetString("PlayerName", "");
+        return PlayerPrefs.GetString(GetPlayerKey("PlayerName"), "");
     }
 
     public void SaveCurrentScore(float score)
     {
-        PlayerPrefs.SetFloat("Score", score);
+        PlayerPrefs.SetFloat(GetPlayerKey("Score"), score);
         PlayerPrefs.Save();
     }
 
     public float LoadCurrentScore()
     {
-        return PlayerPrefs.GetFloat("Score", 0);
+        return PlayerPrefs.GetFloat(GetPlayerKey("Score"), 0);
     }
 
     public void SaveHighScore(float score)
     {
-        float currentHighScore = PlayerPrefs.GetFloat("HighScore", 0);
+        float currentHighScore = PlayerPrefs.GetFloat(GetPlayerKey("HighScore"), 0);
 
         if (score > currentHighScore)
         {
-            PlayerPrefs.SetFloat("HighScore", score);
+            PlayerPrefs.SetFloat(GetPlayerKey("HighScore"), score);
             PlayerPrefs.Save();
         }
     }
     public float LoadHighScore()
     {
-        return PlayerPrefs.GetFloat("HighScore", 0);
+        return PlayerPrefs.GetFloat(GetPlayerKey("HighScore"), 0);
     }
 
     public void SaveGemCollected(int score)
     {
-        PlayerPrefs.SetInt("GemCount", score);
+        PlayerPrefs.SetInt(GetPlayerKey("GemCount"), score);
     }
     public int LoadGemCollected()
     {
-        return PlayerPrefs.GetInt("GemCount", 0);
+        return PlayerPrefs.GetInt(GetPlayerKey("GemCount"), 0);
     }
 
     public void SaveTotalGem(int totalGem)
     {
-        int totalGems = PlayerPrefs.GetInt("TotalGem", 0);
+        int totalGems = PlayerPrefs.GetInt(GetPlayerKey("TotalGem"), 0);
         totalGems += totalGem;
-        PlayerPrefs.SetInt("TotalGem", totalGems);
+        PlayerPrefs.SetInt(GetPlayerKey("TotalGem"), totalGems);
+        PlayerPrefs.Save();
+    }
+
+    public void SetTotalGem(int totalGem)
+    {
+        PlayerPrefs.SetInt(GetPlayerKey("TotalGem"), totalGem);
         PlayerPrefs.Save();
     }
 
 
-    //public void SaveTotalGem(int Gem)
-    //{
-    //    PlayerPrefs.SetInt("TotalGem", PlayerPrefs.GetInt("TotalGem", 0) + LoadGemCollected());
-    //}
-
     public int LoadTotalGem()
     {
-        return PlayerPrefs.GetInt("TotalGem", 0);
+        return PlayerPrefs.GetInt(GetPlayerKey("TotalGem"), 0);
     }
+
+    public void SavePurchasedPlayer(int playerIndex)
+    {
+        PlayerPrefs.SetInt(GetPlayerKey("Player_") + playerIndex.ToString(), 1);
+        PlayerPrefs.Save();
+    }
+    public bool LoadPurchasedPlayer(int playerIndex)
+    {
+        return PlayerPrefs.GetInt(GetPlayerKey("Player_") + playerIndex.ToString(), 0) == 1;
+    }
+
 }

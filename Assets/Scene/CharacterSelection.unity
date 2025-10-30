@@ -481,7 +481,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 88.8, y: -182.8}
+  m_AnchoredPosition: {x: 0, y: -180.76149}
   m_SizeDelta: {x: 81.25, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &439991549
@@ -530,7 +530,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1593989603}
         m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: UnlockPlayer
+        m_MethodName: BuyPlayer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -733,9 +733,9 @@ RectTransform:
   - {fileID: 330634464}
   m_Father: {fileID: 1275841780}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -182.8}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 44.2}
   m_SizeDelta: {x: 81.25, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &695838580
@@ -784,7 +784,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1593989603}
         m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: GamePlay
+        m_MethodName: Play
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2146,21 +2146,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d9505a97dd6654bbbdbd6fe5c75f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentPlayerIndex: 1
-  playerPrefabs:
+  currentPlayerIndex: 0
+  players:
   - {fileID: 253984715399490580}
   - {fileID: 5606020081796827020}
   playerBlueprints:
-  - name: DefaultPlayer
+  - name: Default Player
     index: 0
     price: 0
-    isPurchased: 0
+    isPurchased: 1
   - name: Flash
     index: 1
-    price: 50
+    price: 10
     isPurchased: 0
-  buyButton: {fileID: 439991549}
-  coinText: {fileID: 2044862632}
+  gem: {fileID: 2044862632}
+  play: {fileID: 695838580}
+  Buy: {fileID: 439991549}
 --- !u!1 &1607308098
 GameObject:
   m_ObjectHideFlags: 0
@@ -5616,7 +5617,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &5615021957896989408
 GameObject:
   m_ObjectHideFlags: 0
