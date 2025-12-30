@@ -2,11 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-    private float laneDistance = 1.5f;
+    private float laneDistance = 2f;
     private int currentLane = 1;
 
     private float moveSpeed = 10.0f;
@@ -20,12 +22,16 @@ public class PlayerController : MonoBehaviour
 
     public bool isJump = true;
 
+
     private Animator animator;
     private Rigidbody rb;
     private CapsuleCollider capsuleCollider;
 
     private Vector3 originalCenter;
     private float originalHeight;
+
+    public GameObject powerUps;
+    public bool magnetActive;
 
     void Start()
     {
@@ -91,10 +97,50 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.position = Vector3.Slerp(transform.position, targetPosition, Time.deltaTime * moveSpeed);
+        
+        if (magnetActive)
+            Magnet();
     }
 
-    
+    private void Magnet()
+    {
+        powerUps.gameObject.SetActive(true);
+        StartCoroutine(GemCollectingTime(10));
+    }
 
+    private void OnCollisionEnter(Collision other)
+    {
+
+        if (other.gameObject.CompareTag("Obstacle"))
+        {
+            // Disable all Move scripts (stop lane movement)
+            Move[] moves = FindObjectsOfType<Move>();
+            foreach (Move m in moves)
+            {
+                m.enabled = false;
+                GameManager.gameOver = true;
+            }
+
+            // Play hit animation
+            if (animator != null)
+                animator.Play("Stumble Backwards");
+
+        }
+
+        if (other.gameObject.CompareTag("Magnet"))
+        {
+            Destroy(other.gameObject);
+            magnetActive = true;
+        }
+    }
+    
+    IEnumerator GemCollectingTime(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        powerUps.gameObject.SetActive(false);
+        magnetActive = false;
+    }
+    
     private void MoveLeft()
     {
         if (currentLane > 0)

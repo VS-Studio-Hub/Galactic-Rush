@@ -53,7 +53,7 @@ public class ShopManager : MonoBehaviour
 
 
 
-        if(playerBlueprints[currentPlayerIndex].isPurchased)
+        if (playerBlueprints[currentPlayerIndex].isPurchased)
         {
             Buy.gameObject.SetActive(false);
             play.gameObject.SetActive(true);
@@ -65,7 +65,7 @@ public class ShopManager : MonoBehaviour
         }
 
         int currentGems = SaveManager.instance.LoadTotalGem();
-        
+
         if (currentGems < playerBlueprints[currentPlayerIndex].price && !playerBlueprints[currentPlayerIndex].isPurchased)
         {
             Buy.interactable = false;
@@ -75,7 +75,7 @@ public class ShopManager : MonoBehaviour
     public void BuyPlayer()
     {
         int currentGems = SaveManager.instance.LoadTotalGem();
-        if(currentGems >= playerBlueprints[currentPlayerIndex].price && !playerBlueprints[currentPlayerIndex].isPurchased)
+        if (currentGems >= playerBlueprints[currentPlayerIndex].price && !playerBlueprints[currentPlayerIndex].isPurchased)
         {
             currentGems -= playerBlueprints[currentPlayerIndex].price;
             SaveManager.instance.SetTotalGem(currentGems);

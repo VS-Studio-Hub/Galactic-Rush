@@ -7,6 +7,11 @@ TagManager:
   - Obstacle
   - Collectible
   - Ground
+  - Gem
+  - Magnet
+  - X2
+  - Shield
+  - PlayerShield
   layers:
   - Default
   - TransparentFX

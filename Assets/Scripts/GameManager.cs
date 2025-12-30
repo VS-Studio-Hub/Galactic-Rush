@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -90,14 +91,20 @@ public class GameManager : MonoBehaviour
     private void LaneSpeed()
     {
         distanceTraveled += -currentSpeed * Time.deltaTime;
+
+        if (PowerUps.x2)
+        {
+            distanceTraveled += (-currentSpeed * 2f) * Time.deltaTime ;
+        }
+
         //Debug.Log("Distance Traveled: " + Mathf.FloorToInt(distanceTraveled));
 
         float t = Mathf.Clamp01(distanceTraveled / accelerationDistance);
         float targetSpeed = Mathf.Lerp(minSpeed, maxSpeed, t);
 
         currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * smoothFactor);
-
     }
+
 
     public float GetDistanceTraveled()
     {
