@@ -1,0 +1,52 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Venthan.DailyMission
+{
+    public class UIMissionManager : MonoBehaviour
+    {
+        [Header("Elements")]
+        [SerializeField] private UIMissionContainer missionContainerPrefab;
+        [SerializeField] private Transform missionContainersParent;
+
+        List<UIMissionContainer> activeMissionContainers = new List<UIMissionContainer>();
+
+        void Start()
+        {
+
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+
+        }
+
+        public void Init(Mission[] activeMissions)
+        {
+            for(int i = 0; i < activeMissions.Length; i++)
+            {
+                UIMissionContainer containerInstance = Instantiate(missionContainerPrefab, missionContainersParent);
+
+                int _i = i;
+                containerInstance.Configure(activeMissions[i], () => ClaimMission(_i));
+
+                activeMissionContainers.Add(containerInstance);
+            }
+        }
+
+        private void ClaimMission(int index)
+        {
+            activeMissionContainers[index].Claim();
+            activeMissionContainers[index].transform.SetAsLastSibling();
+
+            MissionManager.instance.HandleMissionClaimed(index);
+        }
+
+
+        public void UpdateMission(int index)
+        {
+            activeMissionContainers[index].UpdateVisuals();
+        }
+    }
+}

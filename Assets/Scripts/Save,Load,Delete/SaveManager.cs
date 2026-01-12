@@ -17,7 +17,6 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-
     //  Profile Handling
     private string GetPlayerKey(string key)
     {
@@ -36,8 +35,6 @@ public class SaveManager : MonoBehaviour
         return PlayerPrefs.GetString("CurrentPlayerName", "DefaultPlayer");
     }
 
-
-
     //  Character Selection
     public void SaveCurrentIndex(int index)
     {
@@ -49,7 +46,6 @@ public class SaveManager : MonoBehaviour
     {
         return PlayerPrefs.GetInt(GetPlayerKey("SelectedCharacter"), 0);
     }
-
 
     //  Score System
     public void SaveCurrentScore(float score)
@@ -78,8 +74,6 @@ public class SaveManager : MonoBehaviour
         return PlayerPrefs.GetFloat(GetPlayerKey("HighScore"), 0);
     }
 
-
-
     //  Gem System
     public void SaveTotalGem(int gemsToAdd)
     {
@@ -101,8 +95,6 @@ public class SaveManager : MonoBehaviour
         return PlayerPrefs.GetInt(GetPlayerKey("TotalGem"), 0);
     }
 
-
-
     //  Character Unlock System
     public void SavePurchasedPlayer(int playerIndex)
     {
@@ -114,4 +106,5 @@ public class SaveManager : MonoBehaviour
     {
         return PlayerPrefs.GetInt(GetPlayerKey("Unlocked_" + playerIndex), 0) == 1;
     }
+
 }
