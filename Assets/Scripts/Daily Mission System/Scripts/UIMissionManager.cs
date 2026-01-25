@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,6 +25,8 @@ namespace Venthan.DailyMission
 
         public void Init(Mission[] activeMissions)
         {
+            missionContainersParent.Clear();
+            activeMissionContainers.Clear();
             for(int i = 0; i < activeMissions.Length; i++)
             {
                 UIMissionContainer containerInstance = Instantiate(missionContainerPrefab, missionContainersParent);
@@ -33,6 +36,15 @@ namespace Venthan.DailyMission
 
                 activeMissionContainers.Add(containerInstance);
             }
+
+            Reorder();
+        }
+
+        private void Reorder()
+        {
+            for(int i = 0; i < activeMissionContainers.Count;i++)
+                if(activeMissionContainers[i].IsClaimed)
+                    activeMissionContainers[i].transform.SetAsLastSibling();
         }
 
         private void ClaimMission(int index)

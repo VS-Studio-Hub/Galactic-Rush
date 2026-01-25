@@ -91,9 +91,13 @@ public class RandomSpawnObjects : MonoBehaviour
     {
         for (int i = 0; i < pickUpsTransform.Length; i++)
         {
+            int randomSpawn = Random.Range(0, 3);
             int randomIndex = Random.Range(0, pickUps.Length);
-            GameObject spawned = Instantiate(pickUps[randomIndex], pickUpsTransform[i].position, Quaternion.identity);
-            spawned.transform.SetParent(spawnManager.lastSpawnedLane.transform);
+            if (randomSpawn == 2)
+            {
+                GameObject spawned = Instantiate(pickUps[randomIndex], pickUpsTransform[i].position, Quaternion.identity);
+                spawned.transform.SetParent(spawnManager.lastSpawnedLane.transform);
+            }
         }
     }
 }

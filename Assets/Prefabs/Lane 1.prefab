@@ -518,9 +518,9 @@ MonoBehaviour:
   - {fileID: 8957972115977626981, guid: 302a26077480c5f42b7fe9b388f8143d, type: 3}
   gem: {fileID: 7504018166333140650, guid: 62ec511b10d7bf543963a934ff5306e9, type: 3}
   pickUps:
-  - {fileID: 1994419209938393917, guid: c1db7f85b6ff72140be0fe2dc4a4d188, type: 3}
-  - {fileID: 678022381394615147, guid: 3e9aaf752d9d50b4da113a3ba8afd8e4, type: 3}
-  - {fileID: 6265143813026872333, guid: 02c575b230edf99469a96cea184e6565, type: 3}
+  - {fileID: 7703099400116719790, guid: 721b6b594adeecc468e7bd0c278886c1, type: 3}
+  - {fileID: 4897160751549058306, guid: 2635fba9e2d155042a541eb712ab8f46, type: 3}
+  - {fileID: 3282383306877269436, guid: b04d4fb97eefda74f8c68d86cbdd123d, type: 3}
 --- !u!114 &-9055142129860969505
 MonoBehaviour:
   m_ObjectHideFlags: 0

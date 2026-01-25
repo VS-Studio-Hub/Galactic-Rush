@@ -3,11 +3,9 @@ using System;
 
 namespace Venthan.DailyMission
 {
-    [System.Serializable]
-    public class Mission 
+    [Serializable]
+    public class Mission
     {
-
-        [Header(" Actions ")]
         public static Action<Mission> updated;
         public static Action<Mission> completed;
 
@@ -20,7 +18,6 @@ namespace Venthan.DailyMission
         private bool isClaimed;
         public bool IsClaimed => isClaimed;
 
-
         private int amount;
         public int Amount
         {
@@ -28,25 +25,38 @@ namespace Venthan.DailyMission
             set
             {
                 amount = Mathf.Min(value, data.Target);
-
                 updated?.Invoke(this);
 
-                if (amount == data.Target)
+                if (!isComplete && amount >= data.Target)
                     Complete();
             }
         }
 
         public float Progress => (float)amount / data.Target;
         public string ProgressString => amount + " / " + data.Target;
-
         public EMissionType Type => data.Type;
 
         public Mission(MissionData data)
         {
             this.data = data;
+            amount = 0;
+            isComplete = false;
+            isClaimed = false;
         }
 
-        public void Complete()
+        // Rebuild from save
+        public Mission(MissionData data, int amount, bool claimed)
+        {
+            this.data = data;
+            this.amount = Mathf.Min(amount, data.Target);
+
+            if (this.amount >= data.Target)
+                isComplete = true;
+
+            isClaimed = claimed;
+        }
+
+        private void Complete()
         {
             isComplete = true;
             completed?.Invoke(this);
@@ -54,7 +64,7 @@ namespace Venthan.DailyMission
 
         public void Claim()
         {
-            isComplete = true;
+            if (!isComplete) return;
             isClaimed = true;
         }
     }

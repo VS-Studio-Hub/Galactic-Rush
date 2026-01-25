@@ -23,7 +23,7 @@ public class ShopManager : MonoBehaviour
     }
     void Start()
     {
-
+        currentPlayerIndex = SaveManager.instance.LoadCurrentIndex();
         foreach (PlayerBlueprint blueprint in playerBlueprints)
         {
             if (SaveManager.instance.LoadPurchasedPlayer(blueprint.index))
@@ -93,7 +93,7 @@ public class ShopManager : MonoBehaviour
             currentPlayerIndex = 0;
         }
         players[currentPlayerIndex].SetActive(true);
-        SaveManager.instance.SavePurchasedPlayer(playerBlueprints[currentPlayerIndex].index);
+        SaveManager.instance.SaveCurrentIndex(currentPlayerIndex);
     }
 
     public void PreviousPlayer()
@@ -105,11 +105,12 @@ public class ShopManager : MonoBehaviour
             currentPlayerIndex = players.Length - 1;
         }
         players[currentPlayerIndex].SetActive(true);
-        SaveManager.instance.SavePurchasedPlayer(playerBlueprints[currentPlayerIndex].index);
+        SaveManager.instance.SaveCurrentIndex(currentPlayerIndex);
     }
 
     public void Play()
     {
+        SaveManager.instance.SaveCurrentIndex(currentPlayerIndex);
         SceneManager.LoadScene("GamePlay");
         GameManager.gemCount = 0;
     }

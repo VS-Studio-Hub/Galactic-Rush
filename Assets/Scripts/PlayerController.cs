@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour
     public GameObject powerUps;
     public bool magnetActive;
 
+
     void Start()
     {
         targetPosition = transform.position;

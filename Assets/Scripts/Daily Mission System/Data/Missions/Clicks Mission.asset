@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   target: 5
-  rewardXp: 31
+  rewardXp: 100
   icon: {fileID: 0}

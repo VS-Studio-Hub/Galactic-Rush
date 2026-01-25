@@ -1,133 +1,194 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Coffee.UIExtensions;
-using System.Collections;
 using TMPro;
+using Coffee.UIExtensions;
+using Venthan.ModernUISystem;
 
 namespace Venthan.DailyMission
 {
+
     public class MainMissionSlider : MonoBehaviour
     {
-
         [Header(" Elements ")]
         [SerializeField] private Slider slider;
         [SerializeField] private UISliderItem itemPrefab;
         [SerializeField] private UISliderItem diamondItemPrefab;
         [SerializeField] private RectTransform itemsParent;
-        private TextMeshProUGUI xpText;
-
-        [Header(" Settings ")]
+        [SerializeField] private UIRewardPopup rewardPopup;
         [SerializeField] private Sprite currencyIcon;
+
+        private TextMeshProUGUI xpText;
+        private List<UISliderItem> sliderItems = new List<UISliderItem>();
 
         [Header(" Data ")]
         [SerializeField] private RewardGroupData data;
+
         private int lastRewardIndex;
+        private bool[] itemsOpened;
+
+        private const string sliderSaveKey = "DailyMissionSlider";
 
         [Header(" Actions ")]
         public static Action<UIParticleAttractor> attractorInitialized;
+        public static Action<RewardEntryData[]> rewarded;
 
         private void Awake()
         {
             MissionManager.xpUpdated += OnXpUpdated;
+            MissionManager.reset += ResetSelf;
         }
 
         private void OnDestroy()
         {
             MissionManager.xpUpdated -= OnXpUpdated;
-        }
-
-        private void OnXpUpdated(int xp)
-        {
-            slider.value = xp;
-            xpText.text = xp.ToString();
-
-            CheckForRewards();
+            MissionManager.reset -= ResetSelf;
         }
 
         IEnumerator Start()
         {
             yield return null;
 
-            lastRewardIndex = 0;
+            Load();
             Init();
         }
 
-
-        void Update()
-        {
-
-        }
         private void Init()
         {
             GenerateSliderItems();
             InitSlider();
+            UpdateVisuals(MissionManager.instance.Xp);
+            CheckForRewards();
         }
 
         private void GenerateSliderItems()
         {
             itemsParent.Clear();
+            sliderItems.Clear();
 
+            // XP display item
             UISliderItem diamondItem = Instantiate(diamondItemPrefab, itemsParent);
-            diamondItem.Configure(currencyIcon, 0.ToString());
-
+            diamondItem.Configure(currencyIcon, "0");
             xpText = diamondItem.Text;
 
             attractorInitialized?.Invoke(diamondItem.GetComponent<UIParticleAttractor>());
 
+            // Reward milestones
             for (int i = 0; i < data.RewardMilestoneDatas.Length; i++)
             {
-                RewardMilestoneData milestoneData = data.RewardMilestoneDatas[i];
+                RewardMilestoneData milestone = data.RewardMilestoneDatas[i];
+                UISliderItem item = Instantiate(itemPrefab, itemsParent);
+                item.Configure(milestone.icon, milestone.requiredXP.ToString());
 
-                UISliderItem itemInstance = Instantiate(itemPrefab, itemsParent);
-                itemInstance.Configure(milestoneData.icon, milestoneData.requiredXP.ToString());
+                int index = i;
+                item.Button.onClick.AddListener(() => HandleItemPressed(index));
 
-                int _i = i;
-                itemInstance.Button.onClick.AddListener(() => HandleSliderItemPressed(_i));
+                sliderItems.Add(item);
             }
 
             PlaceItems();
         }
 
-        private void HandleSliderItemPressed(int index)
+        private void HandleItemPressed(int index)
         {
-            Debug.Log($"Slider item {index} was pressed.");
+            if (index >= lastRewardIndex) return;
+            if (itemsOpened[index]) return;
+
+            OpenReward(index);
         }
+
+        private void OpenReward(int index)
+        {
+            itemsOpened[index] = true;
+
+            UIRewardPopup popup = PopupManager.Show(rewardPopup);
+            popup.Configure(data.RewardMilestoneDatas[index].rewards);
+
+            Save();
+            rewarded?.Invoke(data.RewardMilestoneDatas[index].rewards);
+        }
+
         private void PlaceItems()
         {
             float width = itemsParent.rect.width;
             float spacing = width / (itemsParent.childCount - 1);
+            Vector2 start = (Vector2)itemsParent.position - Vector2.right * width / 2f;
 
-            Vector2 startPosition = (Vector2)itemsParent.position - Vector2.right * width / 2;
-
-            for(int i = 0; i < itemsParent.childCount; i++)
-                itemsParent.GetChild(i).position = startPosition + spacing * i * Vector2.right;
+            for (int i = 0; i < itemsParent.childCount; i++)
+                itemsParent.GetChild(i).position = start + spacing * i * Vector2.right;
         }
 
         private void InitSlider()
         {
             slider.minValue = 0;
             slider.maxValue = data.RewardMilestoneDatas[data.RewardMilestoneDatas.Length - 1].requiredXP;
-
             slider.value = 0;
+        }
+
+        private void OnXpUpdated(int xp)
+        {
+            UpdateVisuals(xp);
+            CheckForRewards();
+        }
+
+        private void UpdateVisuals(int xp)
+        {
+            slider.value = xp;
+            xpText.text = xp.ToString();
         }
 
         private void CheckForRewards()
         {
-            if(lastRewardIndex > data.RewardMilestoneDatas.Length - 1)
-                return;
+            while (lastRewardIndex < data.RewardMilestoneDatas.Length &&
+                   slider.value >= data.RewardMilestoneDatas[lastRewardIndex].requiredXP)
+            {
+                lastRewardIndex++;
+            }
 
-            if (slider.value >= data.RewardMilestoneDatas[lastRewardIndex].requiredXP)
-                EnableReward();
+            Save();
         }
 
-        private void EnableReward()
+        private void Load()
         {
-            UISliderItem item = itemsParent.GetChild(lastRewardIndex + 1).GetComponent<UISliderItem>();
-            //item.Animate();
+            if (!PlayerPrefs.HasKey(sliderSaveKey))
+            {
+                lastRewardIndex = 0;
+                itemsOpened = new bool[data.RewardMilestoneDatas.Length];
+                return;
+            }
 
-            lastRewardIndex++;
+            string json = PlayerPrefs.GetString(sliderSaveKey);
+            SliderSaveData save = JsonUtility.FromJson<SliderSaveData>(json);
+
+            lastRewardIndex = save.lastRewardIndex;
+            itemsOpened = save.itemsOpened;
+
+            // Safety if data size changed
+            if (itemsOpened == null || itemsOpened.Length != data.RewardMilestoneDatas.Length)
+                itemsOpened = new bool[data.RewardMilestoneDatas.Length];
+        }
+
+        private void Save()
+        {
+            SliderSaveData save = new SliderSaveData();
+            save.lastRewardIndex = lastRewardIndex;
+            save.itemsOpened = itemsOpened;
+
+            PlayerPrefs.SetString(sliderSaveKey, JsonUtility.ToJson(save));
+            PlayerPrefs.Save();
+        }
+
+        private void ResetSelf()
+        {
+            PlayerPrefs.DeleteKey(sliderSaveKey);
+            PlayerPrefs.Save();
+
+            lastRewardIndex = 0;
+            itemsOpened = new bool[data.RewardMilestoneDatas.Length];
+
+            Init();
         }
     }
 }
-

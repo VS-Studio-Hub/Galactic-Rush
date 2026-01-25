@@ -16,6 +16,9 @@ public class PowerUpsUIManager : MonoBehaviour
 
     public Button magnetBtn, shieldBtn, x2Btn;
 
+
+    public GameObject pickUps, next, previous, buy, start;
+
     void Start()
     {
         currentMagnetLevel = 0;
@@ -123,5 +126,24 @@ public class PowerUpsUIManager : MonoBehaviour
         {
             x2Btn.interactable = false;
         }
+    }
+
+
+    public void PickUps()
+    {
+        start.gameObject.SetActive(false);
+        pickUps.gameObject.SetActive(true);
+        next.gameObject.SetActive(false);
+        previous.gameObject.SetActive(false);
+        buy.gameObject.SetActive(false);
+    }
+
+    public void Characters()
+    {
+        start.gameObject.SetActive(true);
+        pickUps.gameObject.SetActive(false);
+        next.gameObject.SetActive(true);
+        previous.gameObject.SetActive(true);
+        buy.gameObject.SetActive(true);
     }
 }

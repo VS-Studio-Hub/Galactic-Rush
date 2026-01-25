@@ -23,6 +23,8 @@ namespace Venthan.DailyMission
 
         private Mission mission;
 
+        public bool IsClaimed => mission.IsClaimed;
+
         public void Configure (Mission mission, Action callback)
         {
             this.mission = mission;
@@ -35,6 +37,9 @@ namespace Venthan.DailyMission
             claimButton.onClick.AddListener(() => callback?.Invoke());
 
             UpdateVisuals();
+
+            if (mission.IsClaimed)
+                Claim();
         }
 
         public void UpdateVisuals()

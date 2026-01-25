@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
+
+    public GameObject Credits;
+
     public void PlayMenu()
     {
         SceneManager.LoadScene("EnterName");
@@ -15,14 +18,19 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("Score");
     }
 
-    private void Credit()
+    public void Credit()
     {
-        SceneManager.LoadScene("Credit");
+        Credits.SetActive(true);
+    }
+
+    public void X()
+    {
+        Credits.SetActive(false);
     }
 
     public void QuitMenu()
     {
-        PlayerPrefs.DeleteAll();
+        //PlayerPrefs.DeleteAll();
         Application.Quit();
     }
 }

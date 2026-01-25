@@ -1,21 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Camara : MonoBehaviour
+public class CameraFollow : MonoBehaviour
 {
-    public Transform carTransform;
-    public Transform cameraPointTransform;
+    private Transform player;
 
-    Vector3 velocity = Vector3.zero;
+    private Vector3 offset;
+
     void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player").transform;
 
+        offset = transform.position - player.position;
     }
 
-    void FixedUpdate()
+    void LateUpdate()
     {
-        transform.LookAt(carTransform);
-        transform.position = Vector3.SmoothDamp(transform.position, cameraPointTransform.position, ref velocity, 5f * Time.deltaTime);
+        transform.position = player.position + offset;
     }
 }
